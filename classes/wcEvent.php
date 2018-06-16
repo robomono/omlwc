@@ -104,20 +104,91 @@ class FSEvent{
 		
 		
 		
+		$toreturn.= '<div class="grid-x align-center namecontainer">
+						<div class="cell large-12 small-12">'
+							.'JIMMY'.
+						'</div>
+					</div>';
+							
+							
+		$toreturn.= '<div class="grid-x align-center onevsonecontainer">
+						
+						<div class="cell large-5 medium-9 small-12 groupcontainer">
+							
+							<div class="grouptitle">GROUP A</div>
+							<div class="grid-x align-center">
+								<div class="cell large-6 medium-6 small-6 realresultscontainer">
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
+										<div class="cell small-4 cname">ARG</div>
+										<div class="cell small-4 cpts">3</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
+										<div class="cell small-4 cname">BRA</div>
+										<div class="cell small-4 cpts">2</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
+										<div class="cell small-4 cname">POR</div>
+										<div class="cell small-4 cpts">1</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
+										<div class="cell small-4 cname">ESP</div>
+										<div class="cell small-4 cpts">0</div>
+									</div>
+									
+									
+								</div>
+								
+								<div class="cell large-6 medium-6 small-6 predictionresultscontainer">
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
+										<div class="cell small-4 cname">ARG</div>
+										<div class="cell small-4 cpts">3</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
+										<div class="cell small-4 cname">BRA</div>
+										<div class="cell small-4 cpts">2</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
+										<div class="cell small-4 cname">POR</div>
+										<div class="cell small-4 cpts">1</div>
+									</div>
+									
+									<div class="grid-x">
+										<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
+										<div class="cell small-4 cname">ESP</div>
+										<div class="cell small-4 cpts">0</div>
+									</div>
+									
+									
+								</div>
+								
+							</div>
+						</div>
+						
+						
+					</div>';
+		
+		
 		foreach($users as $uid=>$v){
-			
-			$toreturn.= '<div class="grid-x align-center">
-							<div class="cell large-12 small-12" style="border:1px solid blue;">'
-								.$v["name"].
-							'</div>
-						</div>';
 			
 			
 			$r = 0;
 			$c = 0;
 			
 			foreach($predictions[$uid] as $x=>$pid){
-				
 				
 					
 				if($r==0){

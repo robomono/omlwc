@@ -7,13 +7,20 @@
 	
     <title>Omelet WC Challenge</title>
 	
-	<link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/foundation.css">
+    <link rel="stylesheet" href="css/app.css">
+	
+	<link rel="stylesheet" href="css/styles.css">
 	
 	<link href="https://fonts.googleapis.com/css?family=Roboto:300i,400,500,900" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
   <body>
-	Test
+	
+
+						
+
+	
 	<div class="frontpage"> </div>
 	
 
