@@ -57,45 +57,45 @@ class FSEvent{
 			
 			while($row = mysqli_fetch_array($result)){
 					
-				$predictions[$row['uid']]['a1'] = $row['A1']; 
-				$predictions[$row['uid']]['a2'] = $row['A2']; 
-				$predictions[$row['uid']]['a3'] = $row['A3']; 
-				$predictions[$row['uid']]['a4'] = $row['A4'];
+				$predictions[$row['uid']]['11'] = $row['A1']; 
+				$predictions[$row['uid']]['12'] = $row['A2']; 
+				$predictions[$row['uid']]['13'] = $row['A3']; 
+				$predictions[$row['uid']]['14'] = $row['A4'];
 				
-				$predictions[$row['uid']]['b1'] = $row['B1']; 
-				$predictions[$row['uid']]['b2'] = $row['B2']; 
-				$predictions[$row['uid']]['b3'] = $row['B3']; 
-				$predictions[$row['uid']]['b4'] = $row['B4'];  
+				$predictions[$row['uid']]['21'] = $row['B1']; 
+				$predictions[$row['uid']]['22'] = $row['B2']; 
+				$predictions[$row['uid']]['23'] = $row['B3']; 
+				$predictions[$row['uid']]['24'] = $row['B4'];  
 				
-				$predictions[$row['uid']]['c1'] = $row['C1']; 
-				$predictions[$row['uid']]['c2'] = $row['C2']; 
-				$predictions[$row['uid']]['c3'] = $row['C3']; 
-				$predictions[$row['uid']]['c4'] = $row['C4'];
+				$predictions[$row['uid']]['31'] = $row['C1']; 
+				$predictions[$row['uid']]['32'] = $row['C2']; 
+				$predictions[$row['uid']]['33'] = $row['C3']; 
+				$predictions[$row['uid']]['34'] = $row['C4'];
+			
+				$predictions[$row['uid']]['41'] = $row['D1']; 
+				$predictions[$row['uid']]['42'] = $row['D2']; 
+				$predictions[$row['uid']]['43'] = $row['D3']; 
+				$predictions[$row['uid']]['44'] = $row['D4'];    
 				
-				$predictions[$row['uid']]['d1'] = $row['D1']; 
-				$predictions[$row['uid']]['d2'] = $row['D2']; 
-				$predictions[$row['uid']]['d3'] = $row['D3']; 
-				$predictions[$row['uid']]['d4'] = $row['D4'];    
+				$predictions[$row['uid']]['51'] = $row['E1']; 
+				$predictions[$row['uid']]['52'] = $row['E2']; 
+				$predictions[$row['uid']]['53'] = $row['E3']; 
+				$predictions[$row['uid']]['54'] = $row['E4']; 
 				
-				$predictions[$row['uid']]['e1'] = $row['E1']; 
-				$predictions[$row['uid']]['e2'] = $row['E2']; 
-				$predictions[$row['uid']]['e3'] = $row['E3']; 
-				$predictions[$row['uid']]['e4'] = $row['E4']; 
+				$predictions[$row['uid']]['61'] = $row['F1']; 
+				$predictions[$row['uid']]['62'] = $row['F2']; 
+				$predictions[$row['uid']]['63'] = $row['F3']; 
+				$predictions[$row['uid']]['64'] = $row['F4']; 
 				
-				$predictions[$row['uid']]['f1'] = $row['F1']; 
-				$predictions[$row['uid']]['f2'] = $row['F2']; 
-				$predictions[$row['uid']]['f3'] = $row['F3']; 
-				$predictions[$row['uid']]['f4'] = $row['F4']; 
+				$predictions[$row['uid']]['71'] = $row['G1']; 
+				$predictions[$row['uid']]['72'] = $row['G2']; 
+				$predictions[$row['uid']]['73'] = $row['G3']; 
+				$predictions[$row['uid']]['74'] = $row['G4']; 
 				
-				$predictions[$row['uid']]['g1'] = $row['G1']; 
-				$predictions[$row['uid']]['g2'] = $row['G2']; 
-				$predictions[$row['uid']]['g3'] = $row['G3']; 
-				$predictions[$row['uid']]['g4'] = $row['G4']; 
-				
-				$predictions[$row['uid']]['h1'] = $row['H1']; 
-				$predictions[$row['uid']]['h2'] = $row['H2']; 
-				$predictions[$row['uid']]['h3'] = $row['H3']; 
-				$predictions[$row['uid']]['h4'] = $row['H4']; 
+				$predictions[$row['uid']]['81'] = $row['H1']; 
+				$predictions[$row['uid']]['82'] = $row['H2']; 
+				$predictions[$row['uid']]['83'] = $row['H3']; 
+				$predictions[$row['uid']]['84'] = $row['H4']; 
 						
 			}
 			
@@ -104,82 +104,102 @@ class FSEvent{
 		
 		
 		
-		$toreturn.= '<div class="grid-x align-center namecontainer">
-						<div class="cell large-12 small-12">'
-							.'JIMMY'.
-						'</div>
-					</div>';
+		
 							
 							
-		$toreturn.= '<div class="grid-x align-center onevsonecontainer">
+		$toreturn.= '
 						
-						<div class="cell large-5 medium-9 small-12 groupcontainer">
+						
 							
-							<div class="grouptitle">GROUP A</div>
-							<div class="grid-x align-center">
-								<div class="cell large-6 medium-6 small-6 realresultscontainer">
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
-										<div class="cell small-4 cname">ARG</div>
-										<div class="cell small-4 cpts">3</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
-										<div class="cell small-4 cname">BRA</div>
-										<div class="cell small-4 cpts">2</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
-										<div class="cell small-4 cname">POR</div>
-										<div class="cell small-4 cpts">1</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
-										<div class="cell small-4 cname">ESP</div>
-										<div class="cell small-4 cpts">0</div>
-									</div>
-									
-									
-								</div>
+							
+							
 								
-								<div class="cell large-6 medium-6 small-6 predictionresultscontainer">
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
-										<div class="cell small-4 cname">ARG</div>
-										<div class="cell small-4 cpts">3</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
-										<div class="cell small-4 cname">BRA</div>
-										<div class="cell small-4 cpts">2</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
-										<div class="cell small-4 cname">POR</div>
-										<div class="cell small-4 cpts">1</div>
-									</div>
-									
-									<div class="grid-x">
-										<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
-										<div class="cell small-4 cname">ESP</div>
-										<div class="cell small-4 cpts">0</div>
-									</div>
-									
-									
-								</div>
+								
 								
 							</div>
 						</div>
 						
 						
 					</div>';
+		
+		
+		foreach($users as $uid=>$v){
+			
+			$toreturn.= '<div class="grid-x align-center namecontainer"><div class="cell large-12 small-12">'.$v['name'].'</div></div>
+							<div class="grid-x align-center onevsonecontainer">';
+			
+			for($g=1;$g<=8;$g++){
+				
+				$toreturn.='<div class="cell large-5 medium-9 small-12 groupcontainer">
+								<div class="grouptitle">GROUP '.$g.'</div>
+							
+								<div class="grid-x align-center">
+								
+									<div class="cell large-6 medium-6 small-6 realresultscontainer">
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
+											<div class="cell small-4 cname">ARG</div>
+											<div class="cell small-4 cpts">3</div>
+										</div>
+						
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
+											<div class="cell small-4 cname">BRA</div>
+											<div class="cell small-4 cpts">2</div>
+										</div>
+						
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
+											<div class="cell small-4 cname">POR</div>
+											<div class="cell small-4 cpts">1</div>
+										</div>
+						
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
+											<div class="cell small-4 cname">ESP</div>
+											<div class="cell small-4 cpts">0</div>
+										</div>
+									</div>
+									
+									<div class="cell large-6 medium-6 small-6 predictionresultscontainer">
+									
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
+											<div class="cell small-4 cname">'.$predictions[$uid]['.$g1'].'</div>
+											<div class="cell small-4 cpts">3</div>
+										</div>
+									
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
+											<div class="cell small-4 cname">BRA</div>
+											<div class="cell small-4 cpts">2</div>
+										</div>
+									
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
+											<div class="cell small-4 cname">POR</div>
+											<div class="cell small-4 cpts">1</div>
+										</div>
+									
+										<div class="grid-x">
+											<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
+											<div class="cell small-4 cname">ESP</div>
+											<div class="cell small-4 cpts">0</div>
+										</div>
+									
+									</div>
+									
+							</div>
+						</div>';
+				
+			}
+			
+			$toreturn.= '</div>';
+			
+		}
+		
+		
+		
 		
 		
 		foreach($users as $uid=>$v){
