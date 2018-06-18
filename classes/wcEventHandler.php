@@ -9,7 +9,7 @@ if (isset($_POST) && is_array($_POST)) {
 	
 	if($action == "getAllUsersPicks"){
 		$fsevent = new FSEvent();
-		$return = $fsevent->getAllUsersAndPicks();
+		$return = $fsevent->displayFinalResults();
 
 		
 		echo json_encode($return);

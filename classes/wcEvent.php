@@ -13,1438 +13,485 @@ class FSEvent{
 		
 	}
 	
-	public function getAllUsersAndPicks(){
+	public function displayFinalResults(){
+		
+		$data = $this->calculateUserPoints();
+		
+		$users = $data['users'];
+		$leaderboard = $data['leaderboard'];
+		$teams = $data['teams'];
+		$results = $data['results'];
+		$groups = $data['groups'];
+		
+		foreach($users as $uid=>$v){$sortedlb[$uid] = $users[$uid]['totalpoints'];}
+		arsort($sortedlb);
+		$x=1;
+		$tr.="<div class='grid-container' style='margin-top:25px;'><div class='grid-x'><div class='large-12 columns'>";
+		foreach($sortedlb as $uid=>$score){
+			
+			$tr.= "<div class='userscorerow grid-x'>
+					<div class='userscoreposition'>$x</div>
+					<div class='userscorename' id='goto".$uid."'><a href='#u".$uid."'>".ucfirst($users[$uid]['name'])."</a></div>
+				 	<div class='userscorescore'>".$score."</div>
+				</div>";
+				$x++;
+		}
+		$tr.="</div></div></div>";
+		
+		
+		foreach($users as $uid=>$v){
+			
+			$tr.= "<a name='u".$uid."'></a>";
+			
+			$tr.="<div class='grid-container usergrid gridu".$uid."' style='border:3px solid #f2f2f2;margin-top:25px;padding:0px;'>";
+			
+			$tr.= "<div class='grid-x'>
+						<div class='small-11 cell'><div class='nametitle'> " .strtoupper($users[$uid]['name'])."</div></div>
+						<div class='small-1 cell closename' id='close".$uid."'> <i class='material-icons'>clear</i> </div>
+					</div>";
+			
+			$tr.= "<div class='grid-x'>";
+			
+			for($g=0;$g<=7;$g++){
+				
+				$tr.= "<div class='large-6 small-12 cell'>";
+				
+				$tr.= "<div class='grouptitle'> GROUP " .$groups[$g] ."</div>";
+				
+				$tr.= "<div class='groupheaders grid-x'>
+							<div class='small-6 cell standingsheader'>S T A N D I N G S</div>
+							<div class='small-6 cell picksheader'>P I C K S</div>
+						</div>";
+				
+				
+				
+				for($p=0;$p<=3;$p++){
+					
+					$tr.="<div class='grid-x tablerow level".$p."'>
+							
+							<div class='rowflag small-2 cell' style='border-left: 1px solid #d9d9d9;'>
+								<img src='img/flags1/a" .$teams[$leaderboard[$g][$p]]['aka'] .".png'>
+							</div>
+							
+							<div class='rowaka small-2 cell '>".$teams[$leaderboard[$g][$p]]['aka']."</div>
+							
+							<div class='rowstandingspts small-2 cell'>".$results[$leaderboard[$g][$p]]['pts']."</div>
+							
+							<div class='rowflag small-2 cell ".$users[$uid]['status'][$g][$p]."'>
+								<img src='img/flags1/a" .$teams[$users[$uid]['pick'][$g][$p]]['aka'] .".png'>
+							</div>
+							
+							<div class='rowaka small-2 cell  ".$users[$uid]['status'][$g][$p]."'>".$teams[$users[$uid]['pick'][$g][$p]]['aka']."</div>
+							
+							<div class='rowuserpts small-2 cell ".$users[$uid]['status'][$g][$p]."'>".$users[$uid]['points'][$g][$p]."</div>
+							
+							
+						</div>";
+					
+				}
+				
+				$tr.= "<div class='rowgrouppoints'>" .$users[$uid]['gpoints'][$g]." pts</div>";
+				
+				$tr.= "</div>";//end large-6 small-12 cell for each group
+				
+				if(($g!=0)&&($g%2!=0)){$tr.="</div> <div class='grid-x'>";}//closes grid container every 2 groups
+				
+			}
+			
+			$tr.= "<div class='rowusertotalpoints'>Total: " .$users[$uid]['totalpoints']." pts</div>";
+			
+			$tr.= "<div style='width:100%;padding:10px;font-size:10pt;text-align:center;'><a href='#'>Back to leaderboard</a></div>";
+			
+			$tr.= "</div></div>";//end last group container and ends zurb container
+			
+		}
+		
+		
+		
+		
+		return $tr;
+	}
+	
+	public function calculateUserPoints(){
+		
+		$users = $this->getAllUsersAndPicks();
+		
+		$data = $this->getAllTeamsAndScores();		
+		$leaderboard = $data['leaderboard'];
+		$teams = $data['teams'];
+		$results = $data['results'];
+		
+		$groups = $this->getGroupAlphabet();
+		
+//		$tr.= "GROUP " .$groups[0] ."</br>";
+//		$tr.= $users[1]['pick'][0][0] ." -- " .$leaderboard[0][0] ."</br>";
+//		$tr.= $users[1]['pick'][0][1] ." -- " .$leaderboard[0][1] ."</br>";
+//		$tr.= $users[1]['pick'][0][2] ." -- " .$leaderboard[0][2] ."</br>";
+//		$tr.= $users[1]['pick'][0][3] ." -- " .$leaderboard[0][3] ."</br></br>";
+		
+//		$tr.= "GROUP " .$groups[1] ."</br>";
+//		$tr.= $users[1]['pick'][1][0] ." -- " .$leaderboard[1][0] ."</br>";
+//		$tr.= $users[1]['pick'][1][1] ." -- " .$leaderboard[1][1] ."</br>";
+//		$tr.= $users[1]['pick'][1][2] ." -- " .$leaderboard[1][2] ."</br>";
+//		$tr.= $users[1]['pick'][1][3] ." -- " .$leaderboard[1][3] ."</br></br>";
+		
+//		$tr.= "Analyzing matches... </br>";
+		
+		foreach($users as $uid=>$v){
+			
+//			$tr.= "-- User $uid --</br>";
+			
+			for($g=0;$g<=7;$g++){
+				
+//				$tr.= "Group " .$groups[$g] ."</br>";
+				
+				for($p=0;$p<=3;$p++){
+					
+//					$tr.= "$p - ";
+					
+					if($p==0){
+						//FIRST PICK CHECK
+						if($users[$uid]['pick'][$g][0] == $leaderboard[$g][0]){
+							$pts += 2;
+							$users[$uid]['status'][$g][0] = "bullseye";
+							$users[$uid]['points'][$g][0] = "+2 pts";
+//							$tr.= "bullseye";
+						}elseif($users[$uid]['pick'][$g][0] == $leaderboard[$g][1]){
+							$pts += 1;
+							$users[$uid]['status'][$g][0] = "indirecthit";
+							$users[$uid]['points'][$g][0] = "+1 pt";
+//							$tr.= "indirecthit";
+						}else{
+							$users[$uid]['status'][$g][0] = "totalmiss";
+							$users[$uid]['points'][$g][0] = " ";
+//							$tr.= "miss";
+						}						
+					}//end pick 0 check
+					
+					else if($p==1){
+						//SECONG PICK CHECK
+						if($users[$uid]['pick'][$g][1] == $leaderboard[$g][1]){
+							$pts += 2;
+							$users[$uid]['status'][$g][1] = "bullseye";
+							$users[$uid]['points'][$g][1] = "+2 pts";
+//							$tr.= "bullseye";
+						}elseif($users[$uid]['pick'][$g][1] == $leaderboard[$g][0]){
+							$pts += 1;
+							$users[$uid]['status'][$g][1] = "indirecthit";
+							$users[$uid]['points'][$g][1] = "+1 pt";
+//							$tr.= "indirecthit";
+						}else{
+							$users[$uid]['status'][$g][1] = "totalmiss";
+							$users[$uid]['points'][$g][1] = " ";
+//							$tr.= "miss";
+						}
+					}//end of pick 1 check
+					
+					else if($p==2){
+						//SECONG PICK CHECK
+						if($users[$uid]['pick'][$g][2] == $leaderboard[$g][2]){
+							$pts += 0.5;
+							$users[$uid]['status'][$g][2] = "tinybullseye";
+							$users[$uid]['points'][$g][2] = "+0.5 pts";
+//							$tr.= "bullseye";
+						}else{
+							$users[$uid]['status'][$g][2] = "totalmiss";
+							$users[$uid]['points'][$g][2] = " ";
+//							$tr.= "miss";
+						}
+					}//end of pick 2 check
+					
+					else if($p==3){
+						//THIRD PICK CHECK
+						if($users[$uid]['pick'][$g][3] == $leaderboard[$g][3]){
+							$pts += 0.5;
+							$users[$uid]['status'][$g][3] = "tinybullseye";
+							$users[$uid]['points'][$g][3] = "+0.5 pts";
+//							$tr.= "bullseye";
+						}else{
+							$users[$uid]['status'][$g][3] = "totalmiss";
+							$users[$uid]['points'][$g][3] = " ";
+//							$tr.= "miss";
+						}
+					}//end of pick 2 check
+					
+					
+//					$tr.= "</br>";
+					
+				}//end pick for loop
+				
+//				$tr.= "$pts points </br>";
+				$users[$uid]['gpoints'][$g] = $pts;
+				$users[$uid]['totalpoints'] += $pts;
+				$pts = 0;
+				
+			}//end group for loop
+			
+//			$tr.= $users[$uid]['totalpoints'] ." TOTAL</br>";
+			
+		}//end foreach user
+		
+		$toreturn['users'] = $users;
+		$toreturn['leaderboard'] = $leaderboard;
+		$toreturn['teams'] = $teams;
+		$toreturn['results'] = $results;
+		$toreturn['groups'] = $groups;
+		
+		return $toreturn;
+		
+	}
+	
+	public function displayAllTeamsAndScores(){
+		
+		$data = $this->getAllTeamsAndScores();
+		$groups = $this->getGroupAlphabet();
+		
+		$leaderboard = $data['leaderboard'];
+		$teams = $data['teams'];
+		$results = $data['results'];
+		
+		foreach($leaderboard as $gid=>$v){
+			
+			$tr.= "Group ".$groups[$gid]." </br>";
+			
+			$tr.= $v[0] ." - ";
+			$tr.= $teams[$v[0]]['name'] ." - ";
+			$tr.= $results[$v[0]]['mp'] ." - ";
+			$tr.= $results[$v[0]]['w'] ." - ";
+			$tr.= $results[$v[0]]['d'] ." - ";
+			$tr.= $results[$v[0]]['l'] ." - ";
+			$tr.= $results[$v[0]]['gf'] ." - ";
+			$tr.= $results[$v[0]]['ga'] ." - ";
+			$tr.= $results[$v[0]]['plusminus'] ." - ";
+			$tr.= $results[$v[0]]['pts'] ." </br>";
+			
+			$tr.= $v[1] ." - ";
+			$tr.= $teams[$v[1]]['name'] ." - ";
+			$tr.= $results[$v[1]]['mp'] ." - ";
+			$tr.= $results[$v[1]]['w'] ." - ";
+			$tr.= $results[$v[1]]['d'] ." - ";
+			$tr.= $results[$v[1]]['l'] ." - ";
+			$tr.= $results[$v[1]]['gf'] ." - ";
+			$tr.= $results[$v[1]]['ga'] ." - ";
+			$tr.= $results[$v[1]]['plusminus'] ." - ";
+			$tr.= $results[$v[1]]['pts'] ." </br>";
+			
+			$tr.= $v[2] ." - ";
+			$tr.= $teams[$v[2]]['name'] ." - ";
+			$tr.= $results[$v[2]]['mp'] ." - ";
+			$tr.= $results[$v[2]]['w'] ." - ";
+			$tr.= $results[$v[2]]['d'] ." - ";
+			$tr.= $results[$v[2]]['l'] ." - ";
+			$tr.= $results[$v[2]]['gf'] ." - ";
+			$tr.= $results[$v[2]]['ga'] ." - ";
+			$tr.= $results[$v[2]]['plusminus'] ." - ";
+			$tr.= $results[$v[2]]['pts'] ." </br>";
+			
+			$tr.= $v[3] ." - ";
+			$tr.= $teams[$v[3]]['name'] ." - ";
+			$tr.= $results[$v[3]]['mp'] ." - ";
+			$tr.= $results[$v[3]]['w'] ." - ";
+			$tr.= $results[$v[3]]['d'] ." - ";
+			$tr.= $results[$v[3]]['l'] ." - ";
+			$tr.= $results[$v[3]]['gf'] ." - ";
+			$tr.= $results[$v[3]]['ga'] ." - ";
+			$tr.= $results[$v[3]]['plusminus'] ." - ";
+			$tr.= $results[$v[3]]['pts'] ." </br></br>";
+			
+		}
+		
+		return $tr;
+		
+	}
+	
+	public function getGroupAlphabet(){
+		
+		
+		$group[0] = A;
+		$group[1] = B;
+		$group[2] = C;
+		$group[3] = D;
+		$group[4] = E;
+		$group[5] = F;
+		$group[6] = G;
+		$group[7] = H;
+		
+		return $group;
+	}
+	
+	public function getAllTeamsAndScores(){
 		
 		$this->db_connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
+		
 		if (!$this->db_connection->set_charset("utf8")) {$this->errors[] = $this->db_connection->error;}
 
 		if (!$this->db_connection->connect_errno) {
 			
-			$sql = "SELECT * FROM users";
-
-			$result = $this->db_connection->query($sql);
-			
-			while($row = mysqli_fetch_array($result)){
-					
-				$users[$row['id']]['name'] = $row['name'];
-				$users[$row['id']]['early'] = $row['early'];
-				$names[$row['name']] = $row['id'];		
-			}
-			
-		}
-		
-		if (!$this->db_connection->connect_errno) {
 			
 			$sql = "SELECT * FROM teams";
 
 			$result = $this->db_connection->query($sql);
 			
 			while($row = mysqli_fetch_array($result)){
-					
-				$teams[$row['id']]['team'] = $row['team'];
+				$teams[$row['id']]['name'] = $row['team'];
 				$teams[$row['id']]['aka'] = $row['aka'];
-				$teams[$row['id']]['group'] = $row['group'];		
-			}
+				$teams[$row['id']]['group'] = $row['group'];
+				$teams[$row['id']]['flag'] = $row['flag'];
+				$group[$row['group']][] = $row['id'];	
+			}//end while SQL fetch
+			
+			
+			$sql = "SELECT * FROM results ORDER BY pts DESC, plusminus DESC";
+			
+			$result = $this->db_connection->query($sql);
+	
+			while($row = mysqli_fetch_array($result)){			
+				$results[$row['teamid']]['mp'] = $row['mp'];
+				$results[$row['teamid']]['w'] = $row['w'];
+				$results[$row['teamid']]['d'] = $row['d'];
+				$results[$row['teamid']]['l'] = $row['l'];
+				$results[$row['teamid']]['gf'] = $row['gf'];
+				$results[$row['teamid']]['ga'] = $row['ga'];
+				$results[$row['teamid']]['plusminus'] = $row['plusminus'];
+				$results[$row['teamid']]['pts'] = $row['pts'];
+			}//end while SQL fetch
+			
+			
+		}//end no db connection errors
+		
+		
+		foreach($results as $tid=>$v1){
+			$leaderboard[$teams[$tid]['group']][] = $tid;
+		}
+		
+		
+		$tr['leaderboard'] = $leaderboard;
+		$tr['teams'] = $teams;
+		$tr['results'] = $results;
+		
+		return $tr;
+		
+	}
+	
+	public function displayAllUsersAndPicks(){
+		
+		$users = $this->getAllUsersAndPicks();
+		
+		foreach($users as $uid=>$v){
+			
+			$tr.= "--" .strtoupper($users[$uid]['name']) ."--</br></br>";
+			
+			$tr.= $users[$uid]['pick'][0][0] ."</br>";
+			$tr.= $users[$uid]['pick'][0][1] ."</br>";
+			$tr.= $users[$uid]['pick'][0][2] ."</br>";
+			$tr.= $users[$uid]['pick'][0][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][1][0] ."</br>";
+			$tr.= $users[$uid]['pick'][1][1] ."</br>";
+			$tr.= $users[$uid]['pick'][1][2] ."</br>";
+			$tr.= $users[$uid]['pick'][1][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][2][0] ."</br>";
+			$tr.= $users[$uid]['pick'][2][1] ."</br>";
+			$tr.= $users[$uid]['pick'][2][2] ."</br>";
+			$tr.= $users[$uid]['pick'][2][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][3][0] ."</br>";
+			$tr.= $users[$uid]['pick'][3][1] ."</br>";
+			$tr.= $users[$uid]['pick'][3][2] ."</br>";
+			$tr.= $users[$uid]['pick'][3][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][4][0] ."</br>";
+			$tr.= $users[$uid]['pick'][4][1] ."</br>";
+			$tr.= $users[$uid]['pick'][4][2] ."</br>";
+			$tr.= $users[$uid]['pick'][4][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][5][0] ."</br>";
+			$tr.= $users[$uid]['pick'][5][1] ."</br>";
+			$tr.= $users[$uid]['pick'][5][2] ."</br>";
+			$tr.= $users[$uid]['pick'][5][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][6][0] ."</br>";
+			$tr.= $users[$uid]['pick'][6][1] ."</br>";
+			$tr.= $users[$uid]['pick'][6][2] ."</br>";
+			$tr.= $users[$uid]['pick'][6][3] ."</br></br>";
+			
+			$tr.= $users[$uid]['pick'][7][0] ."</br>";
+			$tr.= $users[$uid]['pick'][7][1] ."</br>";
+			$tr.= $users[$uid]['pick'][7][2] ."</br>";
+			$tr.= $users[$uid]['pick'][7][3] ."</br></br>";
 			
 		}
 		
+		return $tr;
+		
+	}
+	
+	public function getAllUsersAndPicks(){
+		
+		$this->db_connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+		
+		if (!$this->db_connection->set_charset("utf8")) {$this->errors[] = $this->db_connection->error;}
+
 		if (!$this->db_connection->connect_errno) {
+			
+			
+			$sql = "SELECT * FROM users";
+
+			$result = $this->db_connection->query($sql);
+			
+			while($row = mysqli_fetch_array($result)){
+				$users[$row['id']]['name'] = $row['name'];
+				$users[$row['id']]['early'] = $row['early'];
+				$names[$row['name']] = $row['id'];		
+			}//end while SQL fetch
+			
 			
 			$sql = "SELECT * FROM predictions";
-
+			
 			$result = $this->db_connection->query($sql);
 			
 			while($row = mysqli_fetch_array($result)){
-					
-				$predictions[$row['uid']]['11'] = $row['A1']; 
-				$predictions[$row['uid']]['12'] = $row['A2']; 
-				$predictions[$row['uid']]['13'] = $row['A3']; 
-				$predictions[$row['uid']]['14'] = $row['A4'];
-				
-				$predictions[$row['uid']]['21'] = $row['B1']; 
-				$predictions[$row['uid']]['22'] = $row['B2']; 
-				$predictions[$row['uid']]['23'] = $row['B3']; 
-				$predictions[$row['uid']]['24'] = $row['B4'];  
-				
-				$predictions[$row['uid']]['31'] = $row['C1']; 
-				$predictions[$row['uid']]['32'] = $row['C2']; 
-				$predictions[$row['uid']]['33'] = $row['C3']; 
-				$predictions[$row['uid']]['34'] = $row['C4'];
+				$users[$row['id']]['picks'] = $row;	
+			}//end while SQL fetch
 			
-				$predictions[$row['uid']]['41'] = $row['D1']; 
-				$predictions[$row['uid']]['42'] = $row['D2']; 
-				$predictions[$row['uid']]['43'] = $row['D3']; 
-				$predictions[$row['uid']]['44'] = $row['D4'];    
-				
-				$predictions[$row['uid']]['51'] = $row['E1']; 
-				$predictions[$row['uid']]['52'] = $row['E2']; 
-				$predictions[$row['uid']]['53'] = $row['E3']; 
-				$predictions[$row['uid']]['54'] = $row['E4']; 
-				
-				$predictions[$row['uid']]['61'] = $row['F1']; 
-				$predictions[$row['uid']]['62'] = $row['F2']; 
-				$predictions[$row['uid']]['63'] = $row['F3']; 
-				$predictions[$row['uid']]['64'] = $row['F4']; 
-				
-				$predictions[$row['uid']]['71'] = $row['G1']; 
-				$predictions[$row['uid']]['72'] = $row['G2']; 
-				$predictions[$row['uid']]['73'] = $row['G3']; 
-				$predictions[$row['uid']]['74'] = $row['G4']; 
-				
-				$predictions[$row['uid']]['81'] = $row['H1']; 
-				$predictions[$row['uid']]['82'] = $row['H2']; 
-				$predictions[$row['uid']]['83'] = $row['H3']; 
-				$predictions[$row['uid']]['84'] = $row['H4']; 
-						
-			}
 			
-		}
+		}//end no db connection errors
 		
-		
-		
-		
-		
-							
-							
-		$toreturn.= '
-						
-						
-							
-							
-							
-								
-								
-								
-							</div>
-						</div>
-						
-						
-					</div>';
-		
+		//create clean array with users picks by group and count e.g. [1][1]
 		
 		foreach($users as $uid=>$v){
 			
-			$toreturn.= '<div class="grid-x align-center namecontainer"><div class="cell large-12 small-12">'.$v['name'].'</div></div>
-							<div class="grid-x align-center onevsonecontainer">';
+			unset($v['picks'][0]);
+			unset($v['picks']['id']);
+			unset($v['picks'][1]);
+			unset($v['picks']['uid']); //remove from [picks] unnecesary values like uid
 			
-			for($g=1;$g<=8;$g++){
+			$counter = 0; //counter to reset every 4 for new group
+			$group = 0;
+			
+			for($p=2;$p<34;$p++){
 				
-				$toreturn.='<div class="cell large-5 medium-9 small-12 groupcontainer">
-								<div class="grouptitle">GROUP '.$g.'</div>
-							
-								<div class="grid-x align-center">
-								
-									<div class="cell large-6 medium-6 small-6 realresultscontainer">
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
-											<div class="cell small-4 cname">ARG</div>
-											<div class="cell small-4 cpts">3</div>
-										</div>
-						
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
-											<div class="cell small-4 cname">BRA</div>
-											<div class="cell small-4 cpts">2</div>
-										</div>
-						
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
-											<div class="cell small-4 cname">POR</div>
-											<div class="cell small-4 cpts">1</div>
-										</div>
-						
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
-											<div class="cell small-4 cname">ESP</div>
-											<div class="cell small-4 cpts">0</div>
-										</div>
-									</div>
-									
-									<div class="cell large-6 medium-6 small-6 predictionresultscontainer">
-									
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/ARG.png"/> </div>
-											<div class="cell small-4 cname">'.$predictions[$uid]['.$g1'].'</div>
-											<div class="cell small-4 cpts">3</div>
-										</div>
-									
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/BRA.png"/> </div>
-											<div class="cell small-4 cname">BRA</div>
-											<div class="cell small-4 cpts">2</div>
-										</div>
-									
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/POR.png"/> </div>
-											<div class="cell small-4 cname">POR</div>
-											<div class="cell small-4 cpts">1</div>
-										</div>
-									
-										<div class="grid-x">
-											<div class="cell small-4 cflag"> <img src="img/ESP.png"/> </div>
-											<div class="cell small-4 cname">ESP</div>
-											<div class="cell small-4 cpts">0</div>
-										</div>
-									
-									</div>
-									
-							</div>
-						</div>';
+				//$tr.= "$group . $counter = ".$v['picks'][$p]."</br>";
 				
-			}
-			
-			$toreturn.= '</div>';
-			
-		}
-		
-		
-		
-		
-		
-		foreach($users as $uid=>$v){
-			
-			
-			$r = 0;
-			$c = 0;
-			
-			foreach($predictions[$uid] as $x=>$pid){
+				$users[$uid]['pick'][$group][$counter] = $v['picks'][$p];
 				
-					
-				if($r==0){
-					$toreturn.= $teams[$pid]['aka'];
-					$r++;
-				}else if($r>0 && $r<3){
-					$toreturn.= " - " .$teams[$pid]['aka'];
-					$r++;
-				}else{
-					$toreturn.= " - " .$teams[$pid]['aka'] ."</br>";
-					$r=0;
-					if($c==0){$toreturn.= "-</br>";$c=1;}
-					elseif($c==1){$toreturn.= "-----</br></br>";$c=0;}
-				}
-					
-					
-			}
+				$counter++;
+				
+				if($counter==4){$group++;$counter=0;}
+				
+			}//end for (goes through all users picks in order)
 			
-
-		}
+			$unset[$v]['picks'];//unset picks and leaves ordered pick
+			
+		}//end foreach $users
 		
-		return $toreturn;
-	}
+		
+		return $users;
+		
+		
+	}//end function
 	
-	
-	
-	
-	public function getEventStatus($event_id){
-		
-		$points[2] = 500;
-		$points[3] = 1750;
-		$points[5] = 4000;
-		$points[6] = 5200;
-		$points[7] = 6500;
-		$points[8] = 8000;
-		
-		$rank[2] = 25;
-		$rank[3] = 13;
-		$rank[5] = 9;
-		$rank[6] = 5;
-		$rank[7] = 3;
-		$rank[8] = 2;
-		
-		$this->db_connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-		if (!$this->db_connection->set_charset("utf8")) {
-			$this->errors[] = $this->db_connection->error;
-		}
-
-		if (!$this->db_connection->connect_errno) {
-
-			//---GET ROUND
-			$sql = "SELECT e.name,e.status,e.nowsurfing, h.round, h.heat, h.player, h.surfer_id, h.result, h.jersey
-					FROM events AS e
-					LEFT JOIN heats AS h
-					ON e.id = h.event_id
-					WHERE e.id=$event_id
-					ORDER BY h.round,h.heat,h.result,h.player";
-
-			$result = $this->db_connection->query($sql);
-			
-			while($row = mysqli_fetch_array($result)){
-				$eventstatus = $row['status'];
-				$eventname = $row['name'];
-				$currentroundandheat = $row['nowsurfing'];
-				
-				$event[$row['round']][$row['heat']][$row['player']]['sid'] = $row['surfer_id'];
-				$event[$row['round']][$row['heat']][$row['player']]['rnk'] = $row['result'];
-				$event[$row['round']][$row['heat']][$row['player']]['jer'] = $row['jersey'];
-				
-				//records last registered round and heat for surfer
-				$nextheat['round'][$row['surfer_id']] = $row['round'];
-				$nextheat['heat'][$row['surfer_id']] = $row['heat'];
-				
-				//records w/l/r/ww/u per round
-				if($row['round']==1 || $row['round']==3){
-					if($row['result']==1){
-						$roundresults[$row['surfer_id']][$row['round']] = 12;
-						$roundresults[$row['surfer_id']][($row['round']+1)] = 11;
-					}
-					else if($row['result']==2 || $row['result']==3){
-						$roundresults[$row['surfer_id']][$row['round']] = 22;
-					}else if($row['result']==0){
-						$roundresults[$row['surfer_id']][$row['round']] = 0;
-					}
-				}
-				else if($row['round']!=1 && $row['round']!=3){
-					if($row['result']==1){
-						$roundresults[$row['surfer_id']][$row['round']] = 12;
-					}
-					else if($row['result']==2){
-						$roundresults[$row['surfer_id']][$row['round']] = 33;
-					}else if($row['result']==0){
-						$roundresults[$row['surfer_id']][$row['round']] = 0;
-					}
-				}
-				
-				//records point score if surfer scored 2
-				if(($row['round']!=1 && $row['round']!=4) && $row['result']==2){
-					$score[$row['surfer_id']]['pts'] = $points[$row['round']];
-					$score[$row['surfer_id']]['rnk'] = $rank[$row['round']];
-				}
-				else if($row['round']==8 && $row['result']==1){
-					$score[$row['surfer_id']]['pts'] = 10000;
-					$score[$row['surfer_id']]['rnk'] = 1;
-				}
-
-			}
-			//---END GET ROUND
-			
-			$return['status'] = $eventstatus;					//event status
-			$return['name'] = $eventname;							//name
-			$return['current'] = $currentroundandheat;//current (or last registered) round and heat
-			$return['rounds'] = $event;								//allrounds
-			$return['nextheat'] = $nextheat;					//next heat per surfer
-			$return['score'] = $score;								//score per surfer
-			$return['roundresults'] = $roundresults;	//result per surfer per round
-			
-		}//connection errors
-		
-		return $return;
-		
-	}
-	
-	public function getSurfers(){
-		
-		$this->db_connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-		if (!$this->db_connection->set_charset("utf8")) {
-			$this->errors[] = $this->db_connection->error;
-		}
-
-		if (!$this->db_connection->connect_errno) {
-
-			//---GET ROUND
-			$sql = "SELECT id,name,img,aka,wildcard,for_event FROM surfers";
-
-			$result = $this->db_connection->query($sql);
-		
-			while($row = mysqli_fetch_array($result)){
-				$surfers[$row['id']]['name'] = $row['name'];
-				$surfers[$row['id']]['aka'] = $row['aka'];
-				$surfers[$row['id']]['img'] = $row['img'];
-				$surfers[$row['id']]['wc'] = $row['wildcard'];
-				$surfers[$row['id']]['for_event'] = $row['for_event'];
-			}
-			//---END GET ROUND
-		}
-		
-		return $surfers;
-		
-	}
-	
-	public function getPicks($event_id,$league_id){
-		
-		$this->db_connection = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-		if (!$this->db_connection->set_charset("utf8")) {
-			$this->errors[] = $this->db_connection->error;
-		}
-
-		if (!$this->db_connection->connect_errno) {
-
-			//---GET ROUND
-			$sql = "SELECT p.user_id,p.pick_id,p.status,p.active,p.wc,u.name,u.team,u.short 
-					FROM league_picks p
-					LEFT JOIN league_control AS u
-					ON p.user_id = u.user_id
-					WHERE p.event=$event_id AND p.league_id=$league_id AND u.league_id=$league_id AND p.active<=7
-					ORDER BY p.pick_id";
-
-			$result = $this->db_connection->query($sql);
-			
-			while($row = mysqli_fetch_array($result)){
-				$picks[$row['pick_id']][] = $row['user_id'];
-				$pick_header[$row['pick_id']] .= " has-".$row['user_id'];
-				
-				$users[$row['user_id']]['name'] = $row['name'];
-				$users[$row['user_id']]['short'] = strtoupper($row['short']);
-				$users[$row['user_id']]['shortname'] = explode(" ",$row['name'])[0];
-				$users[$row['user_id']]['team'] = $row['team'];
-			}
-			//---END GET ROUND
-		}
-		
-		$toreturn['picks'] = $picks;
-		$toreturn['headers'] = $pick_header;
-		$toreturn['users'] = $users;
-		
-		return $toreturn;
-		
-	}
-	
-	private function buildEventMenu($eventdata,$event_id,$user_id){
-		
-		$event_status = $eventdata['status'];
-		
-		if($event_status==0){
-			//upcoming event
-			$navmenu = '<div class="grid-x align-center navmenu idleeventnav">
-							<div class="cell large-4 small-4 selected">Team</div>
-							<div class="cell large-4 small-4">Waivers</div>
-							<div class="cell large-4 small-4">Leaderboard</div>
-						</div>';
-			
-		}elseif($event_status==1){
-			//idle event, waiver request
-			$navmenu='
-				<div class="grid-x align-center navmenu idleeventnav">
-					<div class="cell large-4 small-4 selected">Team</div>
-					<div class="cell large-4 small-4">Waivers</div>
-					<div class="cell large-4 small-4">Leaderboard</div>
-				</div>
-			';
-			
-		}elseif($event_status==2){
-			//idle event, waiver open
-			$navmenu='
-				<div class="grid-x align-center navmenu idleeventnav">
-					<div class="cell large-4 small-4 selected">Team</div>
-					<div class="cell large-4 small-4">Waivers</div>
-					<div class="cell large-4 small-4">Leaderboard</div>
-				</div>
-			';
-			
-		}elseif($event_status==3){
-			//live event
-			$navmenu='
-				<div class="grid-x align-center navmenu activeeventnav">
-					<div class="cell large-4 small-4 selected">Live</div>
-					<div class="cell large-4 small-4">Team</div>
-					<div class="cell large-4 small-4">Standings</div>
-				</div>
-				
-				<div class="grid-x align-center roundnav">
-					<div class="cell medium-2 small-2"><a href="#" id="roundback"><i class="material-icons">chevron_left</i></a></div>
-		
-					<div class="cell medium-2 small-8 roundselect selected-round" id="menu-round1">Round 1</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round2">Round 2</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round3">Round 3</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round4">Round 4</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round5">Round 5</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round6">Quarterfinal</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round7">Semifinal</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round8">Final</div>
-		
-					<div class="cell medium-2 small-2"><a href="#" id="roundnext"><i class="material-icons">chevron_right</i></a></div>
-				</div>
-				';
-			
-		}elseif($event_status==4){
-			//finished event
-			$navmenu='
-				<div class="grid-x align-center navmenu finishedeventnav">
-					<div class="cell large-4 small-4 selected">Rounds</div>
-					<div class="cell large-4 small-4"><a href="teams.php?eid='.$event_id.'">Team</a></div>
-					<div class="cell large-4 small-4"><a href="standings.php?eid='.$event_id.'">Standings</a></div>
-				</div>
-				
-				<div class="grid-x align-center navmenu leaderboardnav hidden">
-					<div class="cell large-6 small-6 selected">Fantasy League</div>
-					<div class="cell large-6 small-6">World Surf League</div>
-				</div>
-				
-				<div class="grid-x align-center roundnav">
-					<div class="cell medium-2 small-2"><a href="#" id="roundback"><i class="material-icons">chevron_left</i></a></div>
-		
-					<div class="cell medium-2 small-8 roundselect selected-round" id="menu-round1">Round 1</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round2">Round 2</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round3">Round 3</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round4">Round 4</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round5">Round 5</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round6">Quarterfinal</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round7">Semifinal</div>
-					<div class="cell medium-2 small-8 roundselect" id="menu-round8">Final</div>
-		
-					<div class="cell medium-2 small-2"><a href="#" id="roundnext"><i class="material-icons">chevron_right</i></a></div>
-				</div>
-			';
-		}
-		
-		return $navmenu;
-		
-	}
-	
-	private function buildHeatHeaders($rounds,$picks,$users){
-		
-		//picks = 
-		//[surferid] => [0] => [userid]
-		//[surferid] => [1] => [userid]
-		//goes up to [4] bc a surfer can only fit in a 
-		
-		//create array with all users (to figure out if user has no picks in round)
-		foreach($users as $uid=>$v){
-			$userlist[$uid] = 0;
-			$headers[100] .= " has-$uid"; //a list of all users for rounds that havent been filled yet
-		}
-		
-		//first navigates $rounds: round -> heat -> player to get *surferid*
-		//then gets that *surferid* and uses $picks get *numberofusers* that have picked that surfer id
-		//runs that *numberofteams* on loop to get each of the *userid* that picked that *surferid* and inserts into *header* array
-		
-		foreach($rounds as $round=>$v1){
-			
-			//get a new list of users every round to rule out users with no pick this round
-			$allusers = $userlist; 
-			
-			foreach($v1 as $heat=>$v2){
-				foreach($v2 as $player=>$v3){
-					
-					//build "has" header for filtering rounds by username					
-					for($i=0;$i<sizeof($picks[$v3['sid']]);$i++){
-						$headers[$round][$heat]['has'] .= " has-".$picks[$v3['sid']][$i];
-						$allusers[$picks[$v3['sid']][$i]]++;
-					}
-					
-					//build round header and row type for surfers that are scored
-					if($v3['sco']!=0){
-						
-						$headers[$round][$heat]['typ'] = "round".$round."complete";
-						
-						if($v3['sco']==1){
-							$headers[$round][$heat]['res'][$player] = "<div class='grid-x heatwinner eventheatrow'>";
-						}
-						elseif($round!=1 && $round!=4 && $v3['sco']==2){
-							$headers[$round][$heat]['res'][$player] = "<div class='grid-x rd".$round."loser eventheatrow'>";
-						}
-						elseif(($round==1 || $round==4) && $v3['sco']==2){
-							$headers[$round][$heat]['res'][$player] = "<div class='grid-x heatrelegated eventheatrow'>";
-						}
-						elseif($v3['sco']==3){
-							$headers[$round][$heat]['res'][$player] = "<div class='grid-x heatrelegated eventheatrow'>";
-						}
-					}
-					
-					//build round header and row type (jersey) for surfers that aren't scored
-					else if($v3['sco']==0){
-						
-						$headers[$round][$heat]['typ'] = "round".$round."unsurfed";
-						
-						if($v3['jer']=="r"){$headers[$round][$heat]['res'][$player]		  = "<div class='grid-x redjersey eventheatrow'>";}
-						elseif($v3['jer']=="b"){  $headers[$round][$heat]['res'][$player] = "<div class='grid-x bluejersey eventheatrow'>";}
-						elseif($v3['jer']=="w"){  $headers[$round][$heat]['res'][$player] = "<div class='grid-x whitejersey eventheatrow'>";}
-						elseif($v3['jer']=="y"){  $headers[$round][$heat]['res'][$player] = "<div class='grid-x yellowjersey eventheatrow'>";}
-						elseif($v3['jer']=="wr"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x wredjersey eventheatrow'>";}
-						elseif($v3['jer']=="wb"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x wbluejersey eventheatrow'>";}
-						elseif($v3['jer']=="bb"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x bbluejersey eventheatrow'>";}
-						elseif($v3['jer']=="br"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x bredjersey eventheatrow'>";}
-						elseif($v3['jer']=="wy"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x wyellowjersey eventheatrow'>";}
-						elseif($v3['jer']=="by"){ $headers[$round][$heat]['res'][$player] = "<div class='grid-x byellowjersey eventheatrow'>";}
-						else{					  $headers[$round][$heat]['res'][$player] = "<div class='grid-x nosetjersey eventheatrow'>";}
-						
-					}
-					
-				}
-			}
-			
-			//goes through user counter to find out if users have no picks in this round
-			foreach($allusers as $uid=>$count){
-				
-				//0 count means no picks were counted for this user when generating headers in this round
-				if($count==0){
-					$headers[$round]['emp'] .= " has-$uid";
-				}
-				
-			}
-			
-		}
-
-		return $headers;
-		
-	}
-	
-	private function buildSurferPicks($surfers,$users,$picks){
-		
-		foreach($picks as $sid=>$v1){
-			
-			if(!empty($picks[$sid][0])){
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick is-".$picks[$sid][0]."'>".$users[$picks[$sid][0]]['short']."</div>";
-			}else{
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick nopicks'></div>";
-			}
-			
-			if(!empty($picks[$sid][1])){
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick is-".$picks[$sid][1]."'>".$users[$picks[$sid][1]]['short']."</div>";
-			}else{
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick nopicks'></div>";
-			}
-			
-			if(!empty($picks[$sid][2])){
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick is-".$picks[$sid][2]."'>".$users[$picks[$sid][2]]['short']."</div>";
-			}else{
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick nopicks'></div>";
-			}
-			
-			if(!empty($picks[$sid][3])){
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick is-".$picks[$sid][3]."'>".$users[$picks[$sid][3]]['short']."</div>";
-			}else{
-				$surfers[$sid]['pickcell'] .= "<div class='small-3 cell eventpick nopicks'></div>";
-			}
-				
-			
-			
-		}
-		
-		return $surfers;
-		
-	}
-	
-	private function buildFilterMenu($users){
-		
-		$filtermenu.='
-			<div class="grid-x align-center filter-menu">
-			<div class="large-10 medium-12 small-12 cell" id="selectedfilter">Showing: All <i class="material-icons">chevron_left</i> </div>
-			<div class="large-10 medium-12 small-12 cell heat-filter-select" id="selectall">All</div>';
-			
-			foreach($users as $uid=>$v){
-				
-				$filtermenu.='<div class="large-10 medium-12 small-12 cell heat-filter-select" id="select'.$uid.'">'.$v['short'].'</div>';
-			}	
-			
-			$filtermenu.='</div>';
-			
-			return $filtermenu;
-		
-	}
-	
-	private function displayFinishedRounds($rounds,$surfers,$picks,$users,$headers){
-		
-		for($i=1;$i<=8;$i++){
-			
-			$toreturn.= "<div class='roundcontainer hiddenround' id='r".$i."'>"; 
-			
-			//rounds that have data
-			if(!empty($rounds[$i])){
-				
-				//display all rounds
-				foreach($rounds[$i] as $heat=>$v2){
-
-					$toreturn.= "<div class='grid-x align-center eventrounddetails ".$headers[$i][$heat]['has']."' id='e1h".$heat."'>";
-					$toreturn.= "<div class='large-10 medium-12 small-12 cell eventheattitle ".$headers[$i][$heat]['typ']."'>Heat ".$heat."</div>";
-					$toreturn.= "<div class='large-10 medium-12 small-12 cell'>";
-
-					foreach($v2 as $player=>$v3){
-
-						$sid = $v3['sid'];
-
-						$toreturn.= $headers[$i][$heat]['res'][$player];
-						$toreturn.="<div class='large-3 medium-4 cell eventsurfer hide-for-small-only'>".$surfers[$sid]['name']."</div>
-									<div class='small-2 cell eventsurfershort show-for-small-only'>".$surfers[$sid]['aka']."</div>";
-
-						$toreturn.="<div class='large-9 medium-8 small-10 cell eventpicklist'>
-										<div class='grid-x is-collapse-child'>".$surfers[$sid]['pickcell']."</div>
-									</div>";
-
-						$toreturn.="</div>";//ends grid-x row $headers[$round][$heat]['res'][$player]
-
-					}
-
-					$toreturn .= "</div></div>";//ends row grid-x for each heat
-				}
-				
-				//create container for users with no picks this round
-				if(!empty($headers[$i]['emp'])){
-					
-					$toreturn.='
-					
-						<div class="grid-x align-center eventrounddetails emptypicks '.$headers[$i]['emp'].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell">No picks in this round</div>
-						</div>
-						
-					';
-					
-				}
-				
-			}
-			
-			//rounds with no data
-			elseif(empty($rounds[$i])){
-				
-				if($i==1){
-					
-					$toreturn.= '
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 2</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 3</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 4</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 5</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 6</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 7</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 8</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 9</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 10</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 11</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 12</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									';
-					
-				}
-				
-				elseif($i==2 || $i==3){
-					
-					$toreturn.='
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 2</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 3</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 4</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 5</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 6</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 7</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 8</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 9</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 10</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 11</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 12</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-					';
-					
-				}
-				
-				elseif($i==4){
-					
-					$toreturn.= '
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 2</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 3</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>
-									
-									<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-										<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 4</div>
-										<div class="large-10 medium-12 small-12 cell">
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-											<div class="grid-x nosetjersey eventheatrow">
-												<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-												<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-												<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-											</div>
-										</div>
-									</div>';
-				}
-				
-				elseif($i==5 || $i==6){
-					
-					$toreturn.= '
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 2</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 3</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 4</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-					';
-					
-				}
-				
-				elseif($i==7){
-					
-					$toreturn.='
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						
-						<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 2</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-					';
-					
-				}
-				
-				elseif($i==8){
-					
-					$toreturn.='<div class="grid-x align-center eventrounddetails'.$headers[100].'" id="e1h1">
-							<div class="large-10 medium-12 small-12 cell eventheattitle round4unsurfed">Heat 1</div>
-							<div class="large-10 medium-12 small-12 cell">
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-								<div class="grid-x nosetjersey eventheatrow">
-									<div class="large-3 medium-4 cell eventsurfer hide-for-small-only">TBD</div>
-									<div class="small-2 cell eventsurfershort show-for-small-only">TBD</div>
-									<div class="large-9 medium-8 small-10 cell eventpicklist"> </div>
-								</div>
-							</div>
-						</div>
-						';
-				}
-				
-			}
-			
-			$toreturn.= "</div>";//ends round countainer
-		}
-		
-		
-		return $toreturn;
-		
-	}
-	
-	public function getAllRounds($event_id,$user_id){
-		
-		$user_id = 104; //<------------------------------eventually remove and use session id
-		$league_id = 1;//<------------------------------CHANGE LEAGUE ID
-			
-		$eventdata = $this->getEventStatus($event_id);
-		$surfers = $this->getSurfers();
-		$allpicks = $this->getPicks($event_id,$league_id);
-		
-		$picks = $allpicks['picks'];
-		$users = $allpicks['users'];
-		
-		$surfers 	= $this->buildSurferPicks($surfers,$users,$picks);
-				
-		$event_name = 	$eventdata['name'];
-		$event_status = $eventdata['status'];
-		$rounds = 		$eventdata['rounds'];
-
-		if($event_status==4){
-			//finished event
-			$filtermenu = $this->buildFilterMenu($users);
-			
-			$navmenu = $this->buildEventMenu($eventdata,$event_id,$user_id);
-			
-			$headers 		= $this->buildHeatHeaders($rounds,$picks,$users);
-			$displayrounds 	= $this->displayFinishedRounds($rounds,$surfers,$picks,$users,$headers);
-			
-			$display['nav']	 = $navmenu;
-			$display['menu'] = $filtermenu;
-			$display['main'] = $displayrounds;
-			
-		}
-		elseif($event_status==3){
-			//live event
-			$navmenu = $this->buildEventMenu($eventdata,$event_id,$user_id);
-			
-			$filtermenu = $this->buildFilterMenu($users);
-			$headers 	= $this->buildHeatHeaders($rounds,$picks,$users);
-			
-			$rounds 	= $this->displayFinishedRounds($rounds,$surfers,$picks,$users,$headers);
-			
-			$display['nav']	 = $navmenu;
-			$display['menu'] = $filtermenu;
-			$display['main'] = $rounds;
-		
-		}
-		elseif($event_status==2){
-			//lineups open - free waivers
-			$navmenu = $this->buildEventMenu($eventdata,$event_id,$user_id);
-			
-			$display['nav']	 = $navmenu;
-			
-		}
-		elseif($event_status==1){
-			//lineups open - waiver period
-			$navmenu = $this->buildEventMenu($eventdata,$event_id,$user_id);
-			
-			$display['nav']	 = $navmenu;
-		}
-		elseif($event_status==0){
-			//upcoming event
-			$navmenu = $this->buildEventMenu($eventdata,$event_id,$user_id);
-			
-			$display['nav']	 = $navmenu;
-		}
-		
-		//return $display;
-		
-		return $display;
-		
-	}
 	
 }//end class FSEvent
 	

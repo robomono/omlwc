@@ -19,4 +19,26 @@ $( document ).ready(function() {
 	  }
 	});
 	
+	$(".usergrid").hide();
+	
+	$(".userscorename").click(function(){
+		var uid = "u" + this.id.substring(4);//gets the event id from div id	
+		var usergrid = ".grid" +uid;
+		$(usergrid).slideDown("fast");
+		var aTag = $("a[name='"+ uid +"']");
+		$('html,body').animate({scrollTop: aTag.offset().top},'fast');
+	});
+	
+	$(".closename").click(function(){
+		var uid = ".gridu" + this.id.substring(5);//gets the event id from div id	
+		$(uid).slideUp('fast');
+	});
+	
+	
+	
 });
+
+
+
+
+
